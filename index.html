@@ -631,7 +631,7 @@ footer{background:var(--navy);padding:2.5rem 4rem;display:flex;justify-content:s
   });
 })();
 
-/* ============ HERO CONTROLS (play/pause ambience, mute, sound hint) ============ */
+/* ============ HERO CONTROLS (play/pause + mute/unmute + audio) ============ */
 (function(){
   const playPauseBtn = document.getElementById('playPauseBtn');
   const iconPause = document.getElementById('iconPause');
@@ -641,45 +641,48 @@ footer{background:var(--navy);padding:2.5rem 4rem;display:flex;justify-content:s
   const iconUnmuted = document.getElementById('iconUnmuted');
   const soundHint = document.getElementById('soundHint');
   const bgPhoto = document.getElementById('bgPhoto');
-  const fgPhoto = document.getElementById('fgPhoto');
+  const audio = document.getElementById('bgAudio');
 
   let isPaused = false;
   let isMuted = true;
-
-  playPauseBtn.addEventListener('click', ()=>{
-    isPaused = !isPaused;
-    iconPause.style.display = isPaused ? 'none' : 'block';
-    iconPlay.style.display = isPaused ? 'block' : 'none';
-    const anim = isPaused ? 'paused' : 'running';
-    bgPhoto.style.animationPlayState = anim;
-  });
-
-/* ============ AMBIENT BACKGROUND MUSIC (real mp3 file) ============ */
-(function(){
-  const audio = document.getElementById('bgAudio');
-  const muteBtn = document.getElementById('muteBtn');
-  const iconMuted = document.getElementById('iconMuted');
-  const iconUnmuted = document.getElementById('iconUnmuted');
-  const soundHint = document.getElementById('soundHint');
-  let muted = true;
   audio.volume = 0.5;
 
-  function setMuted(val){
-    muted = val;
-    iconMuted.style.display = muted ? 'block' : 'none';
-    iconUnmuted.style.display = muted ? 'none' : 'block';
-    soundHint.classList.add('hidden');
-    if(!muted){
-      audio.play().catch(()=>{});
-    } else {
+  function updatePauseUI(){
+    iconPause.style.display = isPaused ? 'none' : 'block';
+    iconPlay.style.display = isPaused ? 'block' : 'none';
+    bgPhoto.style.animationPlayState = isPaused ? 'paused' : 'running';
+    if(isPaused){
       audio.pause();
+    } else if(!isMuted){
+      audio.play().catch(()=>{});
     }
   }
 
-  muteBtn.addEventListener('click', ()=> setMuted(!muted));
-  soundHint.addEventListener('click', ()=> setMuted(!muted));
-})();
+  function updateMuteUI(){
+    iconMuted.style.display = isMuted ? 'block' : 'none';
+    iconUnmuted.style.display = isMuted ? 'none' : 'block';
+    soundHint.classList.add('hidden');
+    if(isMuted){
+      audio.pause();
+    } else if(!isPaused){
+      audio.play().catch(()=>{});
+    }
+  }
 
+  playPauseBtn.addEventListener('click', ()=>{
+    isPaused = !isPaused;
+    updatePauseUI();
+  });
+
+  muteBtn.addEventListener('click', ()=>{
+    isMuted = !isMuted;
+    updateMuteUI();
+  });
+
+  soundHint.addEventListener('click', ()=>{
+    isMuted = !isMuted;
+    updateMuteUI();
+  });
 
   setTimeout(()=>{ soundHint.classList.add('hidden'); }, 6000);
 
